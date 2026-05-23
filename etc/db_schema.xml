@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
+    <table name="etechflow_supplier_autoflow_log" resource="default" engine="innodb"
+           comment="Audit log of supplier active-flag changes and price recomputations (v0.1.0).">
+        <column xsi:type="int" name="log_id" unsigned="true" nullable="false" identity="true" comment="Audit row id"/>
+        <column xsi:type="int" name="product_id" unsigned="true" nullable="false" comment="Catalog product id"/>
+        <column xsi:type="varchar" name="sku" length="128" nullable="true" comment="Product SKU snapshot at time of event"/>
+        <column xsi:type="varchar" name="event_type" length="32" nullable="false" comment="auto_toggle | reprice | no_active_supplier | error"/>
+        <column xsi:type="varchar" name="trigger_source" length="64" nullable="true" comment="stock_save | msi_source_items_save | product_save | cron | cli_resync"/>
+        <column xsi:type="varchar" name="old_active_slot" length="64" nullable="true" comment="Slot name before the change (e.g. S1=Onlyda)"/>
+        <column xsi:type="varchar" name="new_active_slot" length="64" nullable="true" comment="Slot name after the change (e.g. S2=Auto Remote)"/>
+        <column xsi:type="decimal" name="old_price" scale="4" precision="20" nullable="true" comment="product.price before"/>
+        <column xsi:type="decimal" name="new_price" scale="4" precision="20" nullable="true" comment="product.price after"/>
+        <column xsi:type="decimal" name="old_special_price" scale="4" precision="20" nullable="true" comment="product.special_price before"/>
+        <column xsi:type="decimal" name="new_special_price" scale="4" precision="20" nullable="true" comment="product.special_price after"/>
+        <column xsi:type="text" name="message" nullable="true" comment="Human-readable note for the row"/>
+        <column xsi:type="timestamp" name="created_at" on_update="false" nullable="false" default="CURRENT_TIMESTAMP" comment="When the event was logged"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="log_id"/>
+        </constraint>
+        <index referenceId="ETF_SUPPLIER_AUTOFLOW_LOG_PRODUCT_ID" indexType="btree">
+            <column name="product_id"/>
+        </index>
+        <index referenceId="ETF_SUPPLIER_AUTOFLOW_LOG_CREATED_AT" indexType="btree">
+            <column name="created_at"/>
+        </index>
+        <index referenceId="ETF_SUPPLIER_AUTOFLOW_LOG_EVENT_TYPE" indexType="btree">
+            <column name="event_type"/>
+        </index>
+    </table>
+</schema>

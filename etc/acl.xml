@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Acl/etc/acl.xsd">
+    <acl>
+        <resources>
+            <resource id="Magento_Backend::admin">
+                <resource id="ETechFlow_SupplierAutoflow::root"
+                          title="Supplier Autoflow"
+                          sortOrder="50">
+                    <resource id="ETechFlow_SupplierAutoflow::audit_log"
+                              title="View Audit Log"
+                              sortOrder="10"/>
+                    <resource id="ETechFlow_SupplierAutoflow::config"
+                              title="Configure Supplier Autoflow"
+                              sortOrder="20"/>
+                </resource>
+            </resource>
+            <resource id="Magento_Backend::stores">
+                <resource id="Magento_Backend::stores_settings">
+                    <resource id="Magento_Config::config">
+                        <resource id="ETechFlow_SupplierAutoflow::config_section"
+                                  title="Supplier Autoflow Section"
+                                  sortOrder="50"/>
+                    </resource>
+                </resource>
+            </resource>
+        </resources>
+    </acl>
+</config>

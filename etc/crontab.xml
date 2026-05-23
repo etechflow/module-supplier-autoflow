@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Cron:etc/crontab.xsd">
+    <group id="default">
+        <!--
+            Hourly safety-net: re-evaluate auto-toggle + reprice for every
+            simple product. Catches any propagation hole the legacy observer
+            + MSI plugin missed. Idempotent — runs cheap when state is
+            already correct.
+        -->
+        <job name="etechflow_supplierautoflow_recompute_prices"
+             instance="ETechFlow\SupplierAutoflow\Cron\RecomputePrices"
+             method="execute">
+            <schedule>15 * * * *</schedule>
+        </job>
+    </group>
+</config>

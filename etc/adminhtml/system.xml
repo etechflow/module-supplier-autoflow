@@ -1,0 +1,213 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
+    <system>
+        <tab id="etechflow" translate="label" sortOrder="400">
+            <label>eTechFlow</label>
+        </tab>
+        <section id="etechflow_supplierautoflow"
+                 translate="label"
+                 type="text"
+                 sortOrder="50"
+                 showInDefault="1"
+                 showInWebsite="1"
+                 showInStore="1">
+            <label>Supplier Autoflow</label>
+            <tab>etechflow</tab>
+            <resource>ETechFlow_SupplierAutoflow::config_section</resource>
+
+            <group id="general"
+                   translate="label"
+                   type="text"
+                   sortOrder="10"
+                   showInDefault="1"
+                   showInWebsite="1"
+                   showInStore="1">
+                <label>General Settings</label>
+                <field id="enabled"
+                       translate="label comment"
+                       type="select"
+                       sortOrder="10"
+                       showInDefault="1"
+                       showInWebsite="1"
+                       showInStore="1">
+                    <label>Enable Supplier Autoflow</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>When No, all observers / cron / CLI become no-ops. Default off — you must configure slots below before turning on.</comment>
+                </field>
+            </group>
+
+            <group id="slots"
+                   translate="label"
+                   type="text"
+                   sortOrder="20"
+                   showInDefault="1"
+                   showInWebsite="1"
+                   showInStore="1">
+                <label>Supplier Slots</label>
+                <field id="pairs"
+                       translate="label comment tooltip"
+                       type="textarea"
+                       sortOrder="10"
+                       showInDefault="1"
+                       showInWebsite="1"
+                       showInStore="1">
+                    <label>Supplier Slot Definitions</label>
+                    <tooltip>One slot per line, in priority order (top = first checked). Format: label|active_attr|name_attr|cost_attr|markup_attr[|stock_source_or_qty_attr]</tooltip>
+                    <comment><![CDATA[
+                        One slot per line, in priority order — top = first checked.<br/><br/>
+                        Format (pipe-separated):<br/>
+                        <code>label|active_attr|name_attr|cost_attr|markup_attr|[stock_source_or_qty_attr]</code><br/><br/>
+                        Example for a 2-supplier store:<br/>
+                        <pre style="margin:4px 0">S1|s1_active|s1|s1_cost|s1_markup
+S2|s2_active|s2|s2_cost|s2_markup</pre>
+                        The optional 6th column is used by the Stock Trigger Source below — for MSI per-slot mode put the source code (<code>onlyda</code>), for per-slot qty attribute mode put the attribute code (<code>s1_qty</code>).<br/><br/>
+                        Lines starting with <code>#</code> are treated as comments.
+                    ]]></comment>
+                </field>
+                <field id="stock_dependent_names"
+                       translate="label comment tooltip"
+                       type="textarea"
+                       sortOrder="20"
+                       showInDefault="1"
+                       showInWebsite="1"
+                       showInStore="1">
+                    <label>Stock-Dependent Supplier Names</label>
+                    <tooltip>Slots whose name (case-insensitive) matches a line here get auto-toggled when stock hits 0. Other slots stay manual.</tooltip>
+                    <comment><![CDATA[
+                        One supplier name per line. When a slot's <em>name</em> attribute resolves to one of these names AND its stock trigger source hits zero, the slot's <em>active</em> flag is automatically flipped to No. Other slots (drop-ship suppliers, etc.) stay manual-only.<br/><br/>
+                        Example:<br/>
+                        <pre style="margin:4px 0">Onlyda
+OurOwnWarehouse</pre>
+                        Match is case-insensitive (whitespace trimmed). Empty list = no slots auto-toggle.
+                    ]]></comment>
+                </field>
+            </group>
+
+            <group id="stock"
+                   translate="label"
+                   type="text"
+                   sortOrder="30"
+                   showInDefault="1"
+                   showInWebsite="1"
+                   showInStore="1">
+                <label>Stock Trigger</label>
+                <field id="trigger_source"
+                       translate="label comment tooltip"
+                       type="select"
+                       sortOrder="10"
+                       showInDefault="1"
+                       showInWebsite="1"
+                       showInStore="1">
+                    <label>Stock Trigger Source</label>
+                    <source_model>ETechFlow\SupplierAutoflow\Model\Source\StockTriggerSource</source_model>
+                    <comment><![CDATA[
+                        Where the auto-toggle reads "is this slot's stock empty?":<br/>
+                        <strong>Magento product quantity</strong> — standard StockRegistry qty. Legacy / non-MSI installs.<br/>
+                        <strong>MSI default source</strong> — InventoryApi default source qty.<br/>
+                        <strong>MSI per-slot source</strong> — each slot config line carries an MSI source code in column 6.<br/>
+                        <strong>Per-slot qty attribute</strong> — each slot config line carries a product attribute code in column 6 that holds that supplier's qty.<br/>
+                        <strong>Disabled</strong> — auto-toggle off. Repricing engine still runs when merchants manually flip slot active flags.
+                    ]]></comment>
+                </field>
+            </group>
+
+            <group id="pricing"
+                   translate="label"
+                   type="text"
+                   sortOrder="40"
+                   showInDefault="1"
+                   showInWebsite="1"
+                   showInStore="1">
+                <label>Pricing</label>
+                <field id="output_target"
+                       translate="label comment tooltip"
+                       type="select"
+                       sortOrder="10"
+                       showInDefault="1"
+                       showInWebsite="1"
+                       showInStore="1">
+                    <label>Price Output Target</label>
+                    <source_model>ETechFlow\SupplierAutoflow\Model\Source\OutputTarget</source_model>
+                    <comment><![CDATA[
+                        Which price attribute(s) the module writes when it computes <code>cost × (1 + markup/100)</code>:<br/>
+                        <strong>Regular price</strong> — write to <code>price</code>. Straight markup, no strikethrough.<br/>
+                        <strong>Special price only</strong> — write to <code>special_price</code>. Merchant manages <code>price</code> manually.<br/>
+                        <strong>Special price + auto-anchored regular price</strong> — write computed value to <code>special_price</code>, write <code>price = special_price × anchor_multiplier</code>. Renders strikethrough on storefront + sale-pricing on Google Shopping (recommended for retail).
+                    ]]></comment>
+                </field>
+                <field id="anchor_multiplier"
+                       translate="label comment tooltip"
+                       type="text"
+                       sortOrder="20"
+                       showInDefault="1"
+                       showInWebsite="1"
+                       showInStore="1">
+                    <label>Anchor Multiplier</label>
+                    <tooltip>Used when output target is special_price_with_anchor. Anchor price = special × this. 1.40 = 40% higher than special.</tooltip>
+                    <depends>
+                        <field id="output_target">special_price_with_anchor</field>
+                    </depends>
+                    <comment>Default 1.40 — regular price renders 40% higher than the auto-computed special price. Adjust per your psychological-pricing preference.</comment>
+                </field>
+                <field id="anchor_attribute"
+                       translate="label comment tooltip"
+                       type="text"
+                       sortOrder="30"
+                       showInDefault="1"
+                       showInWebsite="1"
+                       showInStore="1">
+                    <label>Per-Product Anchor Attribute (optional)</label>
+                    <tooltip>Optional attribute code that overrides the global anchor multiplier on individual products.</tooltip>
+                    <depends>
+                        <field id="output_target">special_price_with_anchor</field>
+                    </depends>
+                    <comment>Product attribute code. When set on a product (e.g. <code>1.60</code>), overrides the global anchor multiplier above for that specific product. Leave empty to always use the global value.</comment>
+                </field>
+                <field id="rounding"
+                       translate="label comment tooltip"
+                       type="select"
+                       sortOrder="40"
+                       showInDefault="1"
+                       showInWebsite="1"
+                       showInStore="1">
+                    <label>Price Rounding</label>
+                    <source_model>ETechFlow\SupplierAutoflow\Model\Source\Rounding</source_model>
+                    <comment>How prices are rounded after applying markup. 2dp matches most UK retail; 99p ending is psychological pricing (£3.27 × 1.33 → £3.99).</comment>
+                </field>
+            </group>
+
+            <group id="fallback"
+                   translate="label"
+                   type="text"
+                   sortOrder="50"
+                   showInDefault="1"
+                   showInWebsite="1"
+                   showInStore="1">
+                <label>Fallback Behavior</label>
+                <field id="no_active_supplier_behavior"
+                       translate="label comment tooltip"
+                       type="select"
+                       sortOrder="10"
+                       showInDefault="1"
+                       showInWebsite="1"
+                       showInStore="1">
+                    <label>When No Supplier Active</label>
+                    <source_model>ETechFlow\SupplierAutoflow\Model\Source\NoActiveSupplierBehavior</source_model>
+                    <comment>What happens to a product when every supplier slot is inactive (typically: stock has run out everywhere).</comment>
+                </field>
+                <field id="reverse_toggle_on_restock"
+                       translate="label comment"
+                       type="select"
+                       sortOrder="20"
+                       showInDefault="1"
+                       showInWebsite="1"
+                       showInStore="1">
+                    <label>Re-toggle Active On Restock</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>When Yes: if a previously-auto-toggled slot's stock comes back above 0, automatically flip it back to active and reprice from THAT slot's current cost. When No: once toggled off, the slot stays off until a merchant manually flips it back.</comment>
+                </field>
+            </group>
+        </section>
+    </system>
+</config>
