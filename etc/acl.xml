@@ -14,13 +14,13 @@
                               title="Configure Supplier Autoflow"
                               sortOrder="20"/>
                 </resource>
-            </resource>
-            <resource id="Magento_Backend::stores">
-                <resource id="Magento_Backend::stores_settings">
-                    <resource id="Magento_Config::config">
-                        <resource id="ETechFlow_SupplierAutoflow::config_section"
-                                  title="Supplier Autoflow Section"
-                                  sortOrder="50"/>
+                <resource id="Magento_Backend::stores">
+                    <resource id="Magento_Backend::stores_settings">
+                        <resource id="Magento_Config::config">
+                            <resource id="ETechFlow_SupplierAutoflow::config_section"
+                                      title="Supplier Autoflow Section"
+                                      sortOrder="50"/>
+                        </resource>
                     </resource>
                 </resource>
             </resource>

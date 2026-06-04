@@ -16,6 +16,52 @@
             <tab>etechflow</tab>
             <resource>ETechFlow_SupplierAutoflow::config_section</resource>
 
+            <group id="license" translate="label" sortOrder="5" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>License</label>
+                <field id="license_key" translate="label comment" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>License Key</label>
+                    <comment><![CDATA[Paste your SP-XXXX subscription key or a per-module/bundle key. Leave blank if using the Bundle key.]]></comment>
+                </field>
+                <field id="issued_key" translate="label comment" type="obscure" sortOrder="15" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Issued Key (auto)</label>
+                    <comment><![CDATA[Set automatically on first successful validation. Do not edit.]]></comment>
+                    <backend_model>Magento\Config\Model\Config\Backend\Encrypted</backend_model>
+                </field>
+                <field id="portal_url" translate="label comment" type="text" sortOrder="25" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>License Portal URL</label>
+                    <comment><![CDATA[eTechFlow licensing portal endpoint. Update when your portal URL changes.]]></comment>
+                </field>
+                <field id="bundle_license_key" translate="label comment" type="obscure" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Bundle License Key</label>
+                    <comment><![CDATA[Shared key that activates every eTechFlow module on this host.]]></comment>
+                    <config_path>etechflow_bundle/license/license_key</config_path>
+                    <backend_model>Magento\Config\Model\Config\Backend\Encrypted</backend_model>
+                </field>
+                <field id="production_environment" translate="label comment" type="select" sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Production Environment</label>
+                    <comment><![CDATA[Set to No on staging/dev to bypass licensing.]]></comment>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+            </group>
+
+            <group id="payment" translate="label" sortOrder="6" showInDefault="1" showInWebsite="0" showInStore="0">
+                <label>Payment Settings (Stripe)</label>
+                <comment><![CDATA[Enter your Stripe API keys so merchants can pay for a license directly from this admin. Keys are encrypted.]]></comment>
+                <field id="stripe_secret_key" translate="label comment" type="obscure" sortOrder="10" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Stripe Secret Key</label>
+                    <comment><![CDATA[Your Stripe secret key (sk_test_... or sk_live_...).]]></comment>
+                    <backend_model>Magento\Config\Model\Config\Backend\Encrypted</backend_model>
+                </field>
+                <field id="stripe_publishable_key" translate="label comment" type="text" sortOrder="20" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Stripe Publishable Key</label>
+                    <comment><![CDATA[Your Stripe publishable key (pk_test_... or pk_live_...).]]></comment>
+                </field>
+                <field id="stripe_currency" translate="label comment" type="text" sortOrder="30" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Currency</label>
+                    <comment><![CDATA[3-letter ISO currency code, e.g. usd, gbp, eur. Default: usd]]></comment>
+                </field>
+            </group>
+
             <group id="general"
                    translate="label"
                    type="text"
@@ -162,7 +208,7 @@ OurOwnWarehouse</pre>
                     <depends>
                         <field id="output_target">special_price_with_anchor</field>
                     </depends>
-                    <comment>Product attribute code. When set on a product (e.g. <code>1.60</code>), overrides the global anchor multiplier above for that specific product. Leave empty to always use the global value.</comment>
+                    <comment><![CDATA[Product attribute code. When set on a product (e.g. <code>1.60</code>), overrides the global anchor multiplier above for that specific product. Leave empty to always use the global value.]]></comment>
                 </field>
                 <field id="rounding"
                        translate="label comment tooltip"

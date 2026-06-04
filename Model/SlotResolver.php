@@ -81,6 +81,44 @@ class SlotResolver
     }
 
     /**
+     * Is this product actually managed by Supplier Autoflow? True when at least
+     * one configured slot carries meaningful data on the product (active flag
+     * set, supplier name, or cost). Products with NO slot data set are not ours
+     * to touch — callers must NOT apply the no-active-supplier fallback to them,
+     * otherwise the hourly cron sweep would disable the entire catalog.
+     */
+    public function isProductManaged(int $productId, ?int $storeId = null): bool
+    {
+        $slots = $this->config->getSlots($storeId);
+        if (empty($slots)) {
+            return false;
+        }
+
+        $attrCodes = [];
+        foreach ($slots as $slot) {
+            foreach ($slot->attributeCodes() as $code) {
+                $attrCodes[$code] = true;
+            }
+        }
+
+        $product = $this->loadProduct($productId, array_keys($attrCodes));
+        if ($product === null) {
+            return false;
+        }
+
+        foreach ($slots as $slot) {
+            foreach ([$slot->activeAttr, $slot->nameAttr, $slot->costAttr] as $code) {
+                $val = $product->getData($code);
+                if ($val !== null && $val !== '') {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    /**
      * Resolve a slot's supplier-name attribute to a string (handles text +
      * dropdown + multiselect). Mirrors NDE v1.6.3's resolution logic so the
      * same product reads the same supplier name on both modules.

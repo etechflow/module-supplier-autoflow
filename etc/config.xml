@@ -3,6 +3,15 @@
         xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Store:etc/config.xsd">
     <default>
         <etechflow_supplierautoflow>
+            <license>
+                <production_environment>1</production_environment>
+                <issued_at>0</issued_at>
+                <ip_blocked>0</ip_blocked>
+                <portal_url>https://nonanarchically-rambunctious-lashay.ngrok-free.dev/license/validate</portal_url>
+            </license>
+            <payment>
+                <stripe_currency>usd</stripe_currency>
+            </payment>
             <general>
                 <enabled>0</enabled>
             </general>

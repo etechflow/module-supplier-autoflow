@@ -2,38 +2,16 @@
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Backend:etc/menu.xsd">
     <menu>
-        <!--
-            Shared eTechFlow top-level — declared identically by every
-            eTechFlow module so Magento merges to one sidebar entry.
-            See reference_etechflow_menu_convention.
-        -->
-        <add id="eTechFlow::root"
-             title="eTechFlow"
-             module="ETechFlow_SupplierAutoflow"
-             sortOrder="68"
-             resource="Magento_Backend::admin"/>
-
-        <add id="eTechFlow::settings"
-             title="Settings"
-             module="ETechFlow_SupplierAutoflow"
-             sortOrder="500"
-             parent="eTechFlow::root"
-             resource="Magento_Backend::admin"/>
-
-        <add id="eTechFlow::configuration"
-             title="Configuration"
-             module="ETechFlow_SupplierAutoflow"
-             sortOrder="10"
-             parent="eTechFlow::settings"
-             action="adminhtml/system_config/edit/section/etechflow_supplierautoflow"
-             resource="Magento_Config::config"/>
-
-        <!-- Supplier Autoflow module column. -->
+        <!-- The shared eTechFlow top-level (eTechFlow::root / settings / configuration)
+             is declared by another eTechFlow module. Declaring it again here produced a
+             duplicate 'uniqueAddItemId' that broke every admin page, so this module only
+             parents its own item under eTechFlow::root and links it to the license gate. -->
         <add id="ETechFlow_SupplierAutoflow::root"
              title="Supplier Autoflow"
              module="ETechFlow_SupplierAutoflow"
              sortOrder="80"
              parent="eTechFlow::root"
-             resource="ETechFlow_SupplierAutoflow::root"/>
+             action="etechflow_saf/license/gate"
+             resource="ETechFlow_SupplierAutoflow::config"/>
     </menu>
 </config>

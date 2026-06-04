@@ -48,7 +48,13 @@ class RepriceService
 
         $resolved = $this->slotResolver->resolve($productId, $storeId);
         if ($resolved === null) {
-            $this->handleNoActiveSupplier($productId, $triggerSource, $storeId);
+            // Only apply the no-active-supplier fallback to products THIS module
+            // actually manages (i.e. that carry supplier-slot data). Products with
+            // no supplier attributes set are not ours to touch — skip them so the
+            // cron sweep can never disable the whole catalog.
+            if ($this->slotResolver->isProductManaged($productId, $storeId)) {
+                $this->handleNoActiveSupplier($productId, $triggerSource, $storeId);
+            }
             return;
         }
 
