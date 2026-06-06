@@ -5,6 +5,7 @@
  */
 $settingsUrl = $block->getUrl('adminhtml/system_config/edit/section/etechflow_supplierautoflow');
 $checkoutUrl = $block->getUrl('etechflow_saf/license/checkout');
+$plansUrl = (string) $block->getData('plans_url');
 $externalUrl = 'https://etechflow.com';
 ?>
 <style>
@@ -64,48 +65,7 @@ $externalUrl = 'https://etechflow.com';
   </div>
 
   <div id="etf-plans-section" class="etf-plans">
-
-    <div class="etf-plan">
-      <div class="etf-plan-name">Weekly</div>
-      <div class="etf-plan-price">$9<span>/week</span></div>
-      <div class="etf-plan-desc">Short-term or trying it out. Billed weekly, cancel anytime.</div>
-      <ul class="etf-plan-feat">
-        <li>Full module — every feature</li>
-        <li>Auto-toggle suppliers by stock</li>
-        <li>Reprice from first active supplier</li>
-        <li>Multi-slot priority + anchor pricing</li>
-        <li>Hourly cron + MSI auto-toggle</li>
-      </ul>
-      <button class="etf-plan-btn" onclick="etfShowForm('saf_weekly','Weekly','$9/week')">Choose Weekly</button>
-    </div>
-
-    <div class="etf-plan featured">
-      <div class="etf-plan-name">Monthly</div>
-      <div class="etf-plan-price">$29<span>/month</span></div>
-      <div class="etf-plan-desc">The standard plan for ongoing stores. Billed monthly.</div>
-      <ul class="etf-plan-feat">
-        <li>Full module — every feature</li>
-        <li>Auto-toggle suppliers by stock</li>
-        <li>Reprice from first active supplier</li>
-        <li>Multi-slot priority + anchor pricing</li>
-        <li>Hourly cron + MSI auto-toggle</li>
-      </ul>
-      <button class="etf-plan-btn" onclick="etfShowForm('saf_monthly','Monthly','$29/month')">Choose Monthly</button>
-    </div>
-
-    <div class="etf-plan">
-      <div class="etf-plan-name">Yearly</div>
-      <div class="etf-plan-price">$290<span>/year</span></div>
-      <div class="etf-plan-desc">Best value &mdash; pay for 10 months, get 12 (2 months free).</div>
-      <ul class="etf-plan-feat">
-        <li>Full module — every feature</li>
-        <li>Auto-toggle suppliers by stock</li>
-        <li>Reprice from first active supplier</li>
-        <li>Multi-slot priority + anchor pricing</li>
-        <li>Priority support</li>
-      </ul>
-      <button class="etf-plan-btn" onclick="etfShowForm('saf_yearly','Yearly','$290/year')">Choose Yearly</button>
-    </div>
+    <div id="etf-plans-loading" style="color:#8fa3b8;font-size:13px;padding:20px;">Loading purchase options…</div>
   </div>
 
   <div id="etf-checkout-form" class="etf-form-wrap">
@@ -130,6 +90,8 @@ $externalUrl = 'https://etechflow.com';
 </div>
 
 <script>
+var ETF_PLANS_URL = <?= /* @noEscape */ json_encode($plansUrl); ?>;
+
 function etfShowForm(planKey, planName, planPrice) {
     document.getElementById('etf-plan-input').value = planKey;
     document.getElementById('etf-plan-tag').textContent = planName + ' — ' + planPrice;
@@ -137,4 +99,50 @@ function etfShowForm(planKey, planName, planPrice) {
     form.classList.add('active');
     form.scrollIntoView({behavior:'smooth', block:'start'});
 }
+function etfEsc(s){ var d=document.createElement('div'); d.textContent=s==null?'':String(s); return d.innerHTML; }
+function etfFeatList(text){
+    if(!text) return '';
+    var t = String(text).replace(/^[^—-]*[—-]\s*/, '');
+    var parts = t.split(/,\s*/).filter(function(x){return x.trim();});
+    if(!parts.length) return '';
+    return '<ul class="etf-plan-feat">' + parts.slice(0,6).map(function(p){return '<li>'+etfEsc(p.trim())+'</li>';}).join('') + '</ul>';
+}
+function etfRenderPlans(data){
+    var wrap = document.getElementById('etf-plans-section');
+    var plans = (data && data.plans) || [];
+    if(!plans.length){ etfPlansError(); return; }
+    var oneTime = (data.mode === 'one_time');
+    var html = '';
+    plans.forEach(function(p){
+        var featured = (!oneTime && p.period === 'monthly');
+        var periodTitle = oneTime ? (p.name || 'Lifetime License')
+                          : ({week:'Weekly',month:'Monthly',year:'Yearly'}[p.period_label] || etfEsc(p.name));
+        var desc = oneTime ? 'Pay once — license never expires.'
+                          : ({week:'Billed weekly.',month:'Billed monthly.',year:'Best value — 2 months free.'}[p.period_label] || '');
+        var unit = oneTime ? ' once' : ('/' + etfEsc(p.period_label));
+        var priceDisp = '$' + p.price + (oneTime ? ' once' : '/' + p.period_label);
+        var badge = oneTime ? '<div style="position:absolute;top:-11px;left:50%;transform:translateX(-50%);background:#7c3aed;color:#fff;font-size:9px;font-weight:700;letter-spacing:1.5px;padding:2px 10px;border-radius:10px;">LIFETIME</div>' : '';
+        html += '<div class="etf-plan'+(featured?' featured':'')+'" style="position:relative;">'
+              + badge
+              + '<div class="etf-plan-name">'+etfEsc(periodTitle)+'</div>'
+              + '<div class="etf-plan-price">$'+etfEsc(p.price)+'<span>'+unit+'</span></div>'
+              + '<div class="etf-plan-desc">'+etfEsc(desc)+'</div>'
+              + etfFeatList(p.features)
+              + '<button class="etf-plan-btn" data-slug="'+etfEsc(p.slug)+'" data-name="'+etfEsc(periodTitle)+'" data-price="'+etfEsc(priceDisp)+'">Get '+etfEsc(periodTitle)+'</button>'
+              + '</div>';
+    });
+    wrap.innerHTML = html;
+    wrap.querySelectorAll('.etf-plan-btn').forEach(function(b){
+        b.addEventListener('click', function(){ etfShowForm(b.dataset.slug, b.dataset.name, b.dataset.price); });
+    });
+}
+function etfPlansError(){
+    document.getElementById('etf-plans-section').innerHTML =
+      '<div style="color:#8fa3b8;font-size:13px;padding:16px;">Plans are temporarily unavailable. Use <strong>Enter License Key</strong> above.</div>';
+}
+(function(){
+    if(!ETF_PLANS_URL){ etfPlansError(); return; }
+    fetch(ETF_PLANS_URL, { headers:{ 'Accept':'application/json','ngrok-skip-browser-warning':'1' } })
+      .then(function(r){ return r.json(); }).then(etfRenderPlans).catch(etfPlansError);
+})();
 </script>
