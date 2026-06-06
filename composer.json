@@ -2,7 +2,7 @@
     "name": "etechflow/module-supplier-autoflow",
     "description": "Magento 2 module that auto-toggles supplier active flags based on stock and reprices products from the first-active supplier's cost × markup. Built for stores with multi-supplier products and dynamic supplier-driven pricing. Pairs cleanly with ETechFlow Next Day Eligibility — when a supplier flips, NDE re-evaluates next-day eligibility automatically.",
     "type": "magento2-module",
-    "version": "0.2.0",
+    "version": "1.1.0",
     "license": "proprietary",
     "authors": [
         {
