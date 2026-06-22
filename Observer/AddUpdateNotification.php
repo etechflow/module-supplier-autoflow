@@ -60,6 +60,22 @@ class AddUpdateNotification implements ObserverInterface
 
     private function installedVersion(): string
     {
+        // Read the installed Composer package version (matches the deployed
+        // package; independent of setup_module schema_version, which can lag
+        // the Composer release numbering and cause a false 'update available').
+        try {
+            $registrar = new \Magento\Framework\Component\ComponentRegistrar();
+            $path = $registrar->getPath(\Magento\Framework\Component\ComponentRegistrar::MODULE, self::MODULE_NAME);
+            if ($path) {
+                $composerFile = $path . '/composer.json';
+                if (is_file($composerFile)) {
+                    $data = json_decode((string)file_get_contents($composerFile), true);
+                    if (is_array($data) && !empty($data['version'])) {
+                        return ltrim((string)$data['version'], 'v');
+                    }
+                }
+            }
+        } catch (\Throwable $e) {}
         try {
             $v = $this->resource->getConnection()->fetchOne(
                 'SELECT schema_version FROM ' . $this->resource->getTableName('setup_module') . ' WHERE module = ?',

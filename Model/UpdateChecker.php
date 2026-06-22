@@ -53,9 +53,9 @@ class UpdateChecker
 
     private function installedVersion(): string
     {
-        // Primary: the module's own composer.json version. This always matches
-        // the physically-installed package, independent of the setup_module
-        // schema_version (which may lag the Composer release numbering).
+        // Read the installed Composer package version (matches the deployed
+        // package; independent of setup_module schema_version, which can lag
+        // the Composer release numbering and cause a false 'update available').
         try {
             $registrar = new \Magento\Framework\Component\ComponentRegistrar();
             $path = $registrar->getPath(\Magento\Framework\Component\ComponentRegistrar::MODULE, self::MODULE_NAME);
@@ -69,7 +69,6 @@ class UpdateChecker
                 }
             }
         } catch (\Throwable $e) {}
-        // Fallback: setup_module schema_version.
         try {
             $v = $this->resource->getConnection()->fetchOne(
                 'SELECT schema_version FROM ' . $this->resource->getTableName('setup_module') . ' WHERE module = ?',
