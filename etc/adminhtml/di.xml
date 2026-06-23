@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <!-- Self-contained shared-menu provider: injects eTechFlow::root idempotently
+         so this module needs no other eTechFlow module and never declares the
+         shared menu id in XML. See Plugin/Adminhtml/EnsureEtechflowMenu.php. -->
+    <type name="Magento\Backend\Model\Menu\Builder">
+        <plugin name="etechflow_supplierautoflow_ensure_root_menu"
+                type="ETechFlow\SupplierAutoflow\Plugin\Adminhtml\EnsureEtechflowMenu"/>
+    </type>
+</config>
